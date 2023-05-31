@@ -1,6 +1,7 @@
+import asyncio
 from aiogram.utils import executor
 from config import dp
-from handlers import commands, empty_handler, callback, admin, fsm
+from handlers import commands, empty_handler, callback, admin, fsm, time
 from database import bot_db
 import logging
 
@@ -11,11 +12,14 @@ fsm.register_handlers_fsm(dp)
 
 commands.register_handlers_commands(dp)
 
+
+time.register_handlers_notification(dp)
 admin.register_handler_admin(dp)
 
 empty_handler.register_hendlers_empty(dp)
 
 async def on_startup(_):
+    asyncio.create_task(time.scheduler())
     bot_db.sql_create()
 
 
