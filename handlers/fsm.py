@@ -4,7 +4,9 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from config import ADMINS
 from Keyboard import client_kb
+from database.bot_db import sql_command_insert
 import uuid
+
 
 
 class FSMadmin(StatesGroup):
@@ -20,6 +22,7 @@ async def fsm_start(message: types.Message):
     if message.chat.type == 'private':
         if message.from_user.id not in ADMINS:
             await message.answer('ты не достоин!')
+            await message.chat('ты слишком не дорос')
         else:
             global gen_id
             gen_id = uuid.uuid1()
@@ -28,6 +31,8 @@ async def fsm_start(message: types.Message):
             await message.answer('ты вообще кто такой',reply_markup=client_kb.cancle_markup)
     else:
         await message.answer('пиши в личке!!!')
+
+
 
 async def new_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
@@ -73,13 +78,14 @@ async def new_photo(message: types.Message, state: FSMContext):
         await message.answer_photo(data['photo'], caption=f"{data['id']}\n{data['username']}\n"
                                                           f"{data['name']}\n{data['age']}\n"
                                                           f"{data['naprovlenie']}\n{data['group']}\n"
-                                   )
+        )
         await FSMadmin.next()
         await message.answer('Всё норм?', reply_markup=client_kb.submit_markup)
 
 
 async def submit(message: types.Message, state: FSMContext):
     if message.text.lower() == 'да':
+        await sql_command_insert(state)
         await state.finish()
         await message.answer('не темик',reply_markup= client_kb.markup1)
     elif message.text.lower == 'нет':

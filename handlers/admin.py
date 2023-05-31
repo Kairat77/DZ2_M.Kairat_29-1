@@ -2,6 +2,25 @@ from aiogram import types, Dispatcher
 from config import  bot,ADMINS
 
 
+
+
+
+
+async def start_command(message: types.Message):
+    # Проверяем, является ли пользователь разрешенным
+    if message.from_user.id in ADMINS:
+        await message.reply("Привет! Я бот.")
+    else:
+        await message.reply("Извините, вы не имеете доступа к этому боту.")
+
+# Обработчик всех входящих сообщений
+async def handle_all_messages(message: types.Message):
+    # Проверяем, является ли пользователь разрешенным
+    if message.from_user.id in ADMINS:
+        await message.reply("Я получил ваше сообщение.")
+    else:
+        await message.reply("Извините, вы не имеете доступа к этому боту.")
+
 async def ban(message: types.Message):
     if message.chat.type != 'private':
         if message.from_user.id not in ADMINS:
@@ -20,3 +39,6 @@ async def ban(message: types.Message):
 
 def register_handler_admin(dp: Dispatcher):
     dp.register_message_handler(ban, commands=['ban'], commands_prefix='!/')
+    dp.register_message_handler(start_command,commands=['go'])
+    dp.register_message_handler(handle_all_messages)
+    
